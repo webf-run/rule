@@ -3,14 +3,17 @@
   "version": "0.1.0",
   "description": "Quiz App",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "dev:format": "prettier --write ."
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "workspaces": [
-    "ui"
-  ],
   "volta": {
-    "node": "20.12.2"
+    "node": "22.6.0"
+  },
+  "devDependencies": {
+    "dbmate": "^2.19.0",
+    "prettier": "^3.3.3"
   }
 }
