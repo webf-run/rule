@@ -11,7 +11,7 @@ export type RuleType<T> = IRule<T> | RuleClassFn<T>;
 
 export type Collector = {
   /** Collects the errors against the failed rules and combine them into one while throwing. */
-  check: <T>(value: T, ...rules: IRule<T>[]) => Promise<void>;
+  check: <T>(value: T, ...rules: Array<RuleType<T>>) => Promise<void>;
 
   /** Throws if there are some errors */
   rejectIfError: () => void;
