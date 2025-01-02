@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022"],
+    "module": "NodeNext",
+    "skipLibCheck": true,
+
+    "moduleResolution": "NodeNext",
+    "allowImportingTsExtensions": false,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "noEmit": true,
+
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "strict": true,
+    "noImplicitOverride": true,
+
+    // TODO: Enable later
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+
+    /* Interop Constraints */
+    "verbatimModuleSyntax": true,
+  },
+  "include": [
+    "./src/**/*",
+  ],
+}

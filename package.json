@@ -1,19 +1,24 @@
 {
-  "name": "quiz",
+  "name": "@webf/rule",
+  "type": "module",
   "version": "0.1.0",
-  "description": "Quiz App",
-  "main": "index.js",
+  "description": "Business rule validation library",
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "check:types": "tsc -p tsconfig.json",
     "dev:format": "prettier --write ."
+  },
+  "exports": {
+    ".": "./dist/main.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "volta": {
-    "node": "22.6.0"
-  },
   "devDependencies": {
-    "dbmate": "^2.19.0",
-    "prettier": "^3.3.3"
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  },
+  "volta": {
+    "node": "22.12.0"
   }
 }
