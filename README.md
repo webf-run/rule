@@ -5,7 +5,7 @@ A simple library to write declarative business-validation rules. For schema vali
 ## Installation
 
 ```bash
-npm install --save @webf/rule`
+npm install --save @webf/rule@latest
 ```
 
 ## Usage
@@ -66,7 +66,7 @@ async function validatePayload(payload: Payload) {
 ```
 The `test` function takes variadic number of parameters where first parameter is the data to validate and rest of the parameters are either Validator classes or instance of validator classes. Use the instance of validator class if you have additional inputs that need to be made available when `test` calls the validator's `apply` method.
 
-If you need to run multiple validators and catch all the errors at once, you can ues `withCatch` function:
+If you need to run multiple validators and catch all the errors at once, you can ues `withCatch` function. The `check` function returned by `withCatch` simply adds the `catch` wrapper and collects all the errors into a single list.
 
 ```ts
 import { withCatch } from '@webf/rule';

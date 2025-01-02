@@ -7,6 +7,8 @@ export interface IRule<T> {
 
 export type RuleClassFn<T> = new () => IRule<T>;
 
+export type RuleType<T> = IRule<T> | RuleClassFn<T>;
+
 export type Collector = {
   /** Collects the errors against the failed rules and combine them into one while throwing. */
   check: <T>(value: T, ...rules: IRule<T>[]) => Promise<void>;
@@ -28,7 +30,7 @@ export abstract class Rule {
 /**
  * Creates a rule validator function which throws if any of the validators fail.
  */
-export async function test<T>(value: T, ...rules: Array<IRule<T> | RuleClassFn<T>>): Promise<void> {
+export async function test<T>(value: T, ...rules: Array<RuleType<T>>): Promise<void> {
   const errors: Set<Error> = new Set();
 
   for (const item of rules) {
@@ -51,7 +53,7 @@ export async function test<T>(value: T, ...rules: Array<IRule<T> | RuleClassFn<T
 export function withCatch(): Collector {
   const errors: Error[] = [];
 
-  const check = async <T>(value: T, ...rules: IRule<T>[]) => {
+  const check = async <T>(value: T, ...rules: Array<RuleType<T>>) => {
     try {
       await test(value, ...rules);
     } catch (err) {
