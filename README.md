@@ -1,6 +1,14 @@
-# `@webf/rule` - Simple business validation library.
+# Simple business validation library.
 
-A simple library to write declarative business-validation rules. For schema validations, use Zod, Joi or other schema validation library.
+The `@webf/rule` is a simple library to write declarative business-validation rules. For schema validations, use Zod, Joi or other schema validation library. Some features:
+
+- Simple to use (Only three core APIs)
+- Composable and declarative
+
+## Table of Content
+- [Installation](#installation)
+- [Usage](#usage)
+- [Writing Rules](#writing-rules)
 
 ## Installation
 
@@ -85,5 +93,60 @@ async function validatePayload(payload: Payload) {
 
   // If previous invocation of `check` function created errors then, throw.
   rejectIfError();
+}
+```
+
+## Writing rules
+
+A rule is basically an object of two fields `key` and `apply` function:
+
+```ts
+type IRule<T> = {
+  key: string;
+  apply(value: T): boolean | Promise<boolean>;
+}
+```
+
+The `key` is a error key to identify the rule at runtime and `apply` is a function that should resolve to `boolean` or `Promise<boolean>` value. The rule work on one data type of of data and validates it. You can create a rule using object literal.
+
+```ts
+const MyRule = {
+  key: 'MyRule',
+  apply(value) {
+    return value > 0;
+  },
+};
+```
+
+Or, you can use the base `Rule` class that automatically uses the class name as its `key` at runtime. This is the recommended way to write the rules as it also makes it easy to pass additional dependencies that a rule may need via constructor function.
+
+```ts
+import { Rule } from '@webf/rule';
+
+export class MyRule extends Rule {
+  apply(value) {
+    return value >= 0;
+  }
+}
+```
+
+### Dependency injection
+
+If your rule depends on more than one input for validation, e.g. another value to compare or pass DB client (of course, you should try to keep business logic as pure as possible), then you can use constructor function:
+
+```ts
+import { Rule } from '@webf/rule';
+
+export class MyRule extends Rule {
+  constructor(db) {
+    super();
+    this.db = db;
+  }
+
+  await apply(value) {
+    const toCompare = await db.getValue();
+
+    return value >= toCompare;
+  }
 }
 ```

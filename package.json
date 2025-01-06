@@ -1,8 +1,17 @@
 {
   "name": "@webf/rule",
-  "type": "module",
   "version": "0.1.4",
   "description": "Business rule validation library",
+  "keywords": ["rule", "validation", "business"],
+  "author": {
+    "name": "Harshal Patil"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/webf-run/rule.git"
+  },
+  "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "check:types": "tsc -p tsconfig.json",
@@ -11,14 +20,14 @@
   "exports": {
     ".": "./dist/main.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
     "prettier": "^3.4.2",
     "typescript": "^5.7.2"
   },
   "volta": {
     "node": "22.12.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }
