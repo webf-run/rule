@@ -1,8 +1,12 @@
 {
   "name": "@webf/rule",
-  "version": "0.1.4",
+  "version": "1.0.0",
   "description": "Business rule validation library",
-  "keywords": ["rule", "validation", "business"],
+  "keywords": [
+    "rule",
+    "validation",
+    "business"
+  ],
   "author": {
     "name": "Harshal Patil"
   },
