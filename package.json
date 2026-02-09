@@ -10,7 +10,7 @@
   "author": {
     "name": "Harshal Patil"
   },
-  "license": "SEE LICENSE IN LICENSE",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/webf-run/rule.git"
