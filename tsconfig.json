@@ -29,9 +29,7 @@
     "noFallthroughCasesInSwitch": true,
 
     /* Interop Constraints */
-    "verbatimModuleSyntax": true,
+    "verbatimModuleSyntax": true
   },
-  "include": [
-    "./src/**/*",
-  ],
+  "include": ["./src/**/*"]
 }

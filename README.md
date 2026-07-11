@@ -6,6 +6,7 @@ The `@webf/rule` is a simple library to write declarative business-validation ru
 - Composable and declarative
 
 ## Table of Content
+
 - [Installation](#installation)
 - [Usage](#usage)
 - [Writing Rules](#writing-rules)
@@ -60,7 +61,7 @@ async function validatePayload(payload: Payload) {
   const { date } = payload;
 
   // Some random past date
-  const pastDate = new Date(new Date().getTime() - (24 * 3600 * 1000));
+  const pastDate = new Date(new Date().getTime() - 24 * 3600 * 1000);
 
   try {
     // Throws if the validation fails
@@ -74,6 +75,7 @@ async function validatePayload(payload: Payload) {
   }
 }
 ```
+
 The `test` function takes variadic number of parameters where first parameter is the data to validate and rest of the parameters are either Validator classes or instance of validator classes. Use the instance of validator class if you have additional inputs that need to be made available when `test` calls the validator's `apply` method.
 
 If you need to run multiple validators and catch all the errors at once, you can ues `withCatch` function. The `check` function returned by `withCatch` simply adds the `catch` wrapper and collects all the errors into a single list.
@@ -85,7 +87,7 @@ async function validatePayload(payload: Payload) {
   const { date, name } = payload;
 
   // Some random past date
-  const pastDate = new Date(new Date().getTime() - (24 * 3600 * 1000));
+  const pastDate = new Date(new Date().getTime() - 24 * 3600 * 1000);
 
   const { check, rejectIfError } = withCatch();
 
@@ -106,7 +108,7 @@ A rule is basically an object of two fields `key` and `apply` function:
 type IRule<T> = {
   key: string;
   apply(value: T): boolean | Promise<boolean>;
-}
+};
 ```
 
 The `key` is a error key to identify the rule at runtime and `apply` is a function that should resolve to `boolean` or `Promise<boolean>` value. The rule work on one data type of of data and validates it. You can create a rule using object literal.
@@ -155,7 +157,7 @@ export class MyRule extends Rule {
 
 ## Attaching error context
 
-Returning `false` reports *that* a rule failed, but not *why*. When you need to
+Returning `false` reports _that_ a rule failed, but not _why_. When you need to
 carry dynamic context (the offending value, allowed bounds, or the field that
 failed), a rule can **throw a `RuleError`** instead of returning `false`. The
 `test` and `withCatch` functions catch it and collect it just like any other
