@@ -1,4 +1,4 @@
-import { RuleError } from './error.js';
+import { RuleError, type RuleErrorOptions } from './error.js';
 
 export interface IRule<T> {
   key: string;
@@ -30,17 +30,32 @@ export abstract class Rule {
 /**
  * Creates a rule validator function which throws if any of the validators fail.
  */
-export async function test<T>(value: T, ...rules: Array<RuleType<T>>): Promise<void> {
+export async function test<T>(
+  value: T,
+  ...rules: Array<RuleType<T>>
+): Promise<void> {
   const errors: Set<Error> = new Set();
 
   for (const item of rules) {
     // If item is constructor, create instance of validator.
     // If item is already an instance, use it as is.
     const rule = typeof item === 'function' ? new item() : item;
-    const isPass = await rule.apply(value);
 
-    if (!isPass) {
-      errors.add(new RuleError(rule.key));
+    try {
+      const isPass = await rule.apply(value);
+
+      if (!isPass) {
+        errors.add(new RuleError(rule.key));
+      }
+    } catch (err) {
+      // A rule may throw a `RuleError` to signal a failure carrying dynamic
+      // context (params, path, message). Any other error is unexpected and
+      // propagates as-is.
+      if (err instanceof RuleError) {
+        errors.add(err);
+      } else {
+        throw err;
+      }
     }
   }
 
@@ -48,7 +63,6 @@ export async function test<T>(value: T, ...rules: Array<RuleType<T>>): Promise<v
     throw new AggregateError(errors);
   }
 }
-
 
 export function withCatch(): Collector {
   const errors: Error[] = [];
@@ -76,4 +90,4 @@ export function withCatch(): Collector {
   return { check, rejectIfError };
 }
 
-export { RuleError };
+export { RuleError, type RuleErrorOptions };

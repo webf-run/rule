@@ -9,6 +9,7 @@ The `@webf/rule` is a simple library to write declarative business-validation ru
 - [Installation](#installation)
 - [Usage](#usage)
 - [Writing Rules](#writing-rules)
+- [Attaching error context](#attaching-error-context)
 
 ## Installation
 
@@ -66,7 +67,8 @@ async function validatePayload(payload: Payload) {
     await test(date, DateShouldBeFuture, new AllowThisPastDate(pastDate));
   } catch (e) {
     if (e instanceof AggregateError) {
-      // Each error is instance of `RuleError`.
+      // Each error is instance of `RuleError` and exposes `ruleKey`
+      // (plus optional `params` and `path`, see "Attaching error context").
       console.log(e.errors);
     }
   }
@@ -150,3 +152,67 @@ export class MyRule extends Rule {
   }
 }
 ```
+
+## Attaching error context
+
+Returning `false` reports *that* a rule failed, but not *why*. When you need to
+carry dynamic context (the offending value, allowed bounds, or the field that
+failed), a rule can **throw a `RuleError`** instead of returning `false`. The
+`test` and `withCatch` functions catch it and collect it just like any other
+failure.
+
+```ts
+import { Rule, RuleError } from '@webf/rule';
+
+export class MaxValue extends Rule {
+  constructor(private max: number) {
+    super();
+  }
+
+  apply(value: number): boolean {
+    if (value <= this.max) {
+      return true;
+    }
+
+    // Throw with structured context instead of returning `false`.
+    throw new RuleError(this.key, {
+      params: { max: this.max, actual: value },
+    });
+  }
+}
+```
+
+The `RuleError` accepts an optional second argument:
+
+```ts
+type RuleErrorOptions = {
+  /** Dynamic context describing why the rule failed, e.g. `{ min, max, actual }`. */
+  params?: Record<string, unknown>;
+
+  /** Field path the failure is associated with, e.g. `items[3].value`. */
+  path?: string;
+
+  /** Optional human-readable message. Defaults to `'Invalid rule'`. */
+  message?: string;
+};
+```
+
+When the aggregated error is caught, each `RuleError` exposes this context, so
+you can build localized messages or map failures back to form fields:
+
+```ts
+try {
+  await test(value, new MaxValue(10));
+} catch (e) {
+  if (e instanceof AggregateError) {
+    for (const err of e.errors) {
+      // err.ruleKey => 'MaxValue'
+      // err.params  => { max: 10, actual: 42 }
+      // err.path    => undefined (unless set)
+    }
+  }
+}
+```
+
+Rules that don't need context can keep returning `boolean` as before, this is
+purely additive.
