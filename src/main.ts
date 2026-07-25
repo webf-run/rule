@@ -1,31 +1,26 @@
-import { RuleError, type RuleErrorOptions } from './error.js';
+import { RuleError, type RuleErrorOptions } from './error.ts';
+import { Rule, type IRule, type RuleType } from './rule.ts';
 
-export interface IRule<T> {
-  key: string;
-  apply(value: T): boolean | Promise<boolean>;
-}
-
-export type RuleClassFn<T> = new () => IRule<T>;
-
-export type RuleType<T> = IRule<T> | RuleClassFn<T>;
+export type Condition<T> =
+  | boolean
+  | Promise<boolean>
+  | ((value: T) => boolean)
+  | ((value: T) => Promise<boolean>);
 
 export type Collector = {
   /** Collects the errors against the failed rules and combine them into one while throwing. */
   check: <T>(value: T, ...rules: Array<RuleType<T>>) => Promise<void>;
 
+  /** Same as `check`, but runs the rules only when the condition resolves truthy. */
+  checkIf: <T>(
+    condition: Condition<T>,
+    value: T,
+    ...rules: Array<RuleType<T>>
+  ) => Promise<void>;
+
   /** Throws if there are some errors */
   rejectIfError: () => void;
 };
-
-export abstract class Rule {
-  key: string;
-
-  abstract apply(value: any): boolean | Promise<boolean>;
-
-  constructor() {
-    this.key = this.constructor.name;
-  }
-}
 
 /**
  * Creates a rule validator function which throws if any of the validators fail.
@@ -64,6 +59,23 @@ export async function test<T>(
   }
 }
 
+/**
+ * Conditional variant of `test`. Resolves the condition first; when it is
+ * falsy the rules are skipped (a skip is a pass), otherwise the rules run
+ * exactly as `test(value, ...rules)` would.
+ */
+export async function testIf<T>(
+  condition: Condition<T>,
+  value: T,
+  ...rules: Array<RuleType<T>>
+): Promise<void> {
+  const shouldRun = await resolveCondition(condition, value);
+
+  if (shouldRun) {
+    await test(value, ...rules);
+  }
+}
+
 export function withCatch(): Collector {
   const errors: Error[] = [];
 
@@ -81,13 +93,32 @@ export function withCatch(): Collector {
     }
   };
 
+  const checkIf = async <T>(
+    condition: Condition<T>,
+    value: T,
+    ...rules: Array<RuleType<T>>
+  ) => {
+    const shouldRun = await resolveCondition(condition, value);
+
+    if (shouldRun) {
+      await check(value, ...rules);
+    }
+  };
+
   const rejectIfError = () => {
     if (errors.length > 0) {
       throw new AggregateError(errors);
     }
   };
 
-  return { check, rejectIfError };
+  return { check, checkIf, rejectIfError };
 }
 
-export { RuleError, type RuleErrorOptions };
+function resolveCondition<T>(
+  condition: Condition<T>,
+  value: T
+): boolean | Promise<boolean> {
+  return typeof condition === 'function' ? condition(value) : condition;
+}
+
+export { Rule, RuleError, type IRule, type RuleType, type RuleErrorOptions };
