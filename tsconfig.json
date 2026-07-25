@@ -9,8 +9,11 @@
     "module": "NodeNext",
     "skipLibCheck": true,
 
+    "types": ["*"],
+
     "moduleResolution": "NodeNext",
-    "allowImportingTsExtensions": false,
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "esModuleInterop": true,

@@ -1,21 +1,23 @@
 # Simple business validation library.
 
-The `@webf/rule` is a simple library to write declarative business-validation rules. For schema validations, use Zod, Joi or other schema validation library. Some features:
+The `@webf/rule` is a simple dependency free library to write declarative business-validation rules. For schema validations, use Zod, Joi or other schema validation library. Some features:
 
-- Simple to use (Only three core APIs)
-- Composable and declarative
+- Simple to use (Only four core APIs).
+- Composable and declarative.
+- Pragmatic over theoretical purity.
 
 ## Table of Content
 
 - [Installation](#installation)
 - [Usage](#usage)
+- [Conditional validation](#conditional-validation)
 - [Writing Rules](#writing-rules)
 - [Attaching error context](#attaching-error-context)
 
 ## Installation
 
 ```bash
-npm install --save @webf/rule@latest
+npm install --save @webf/rule
 ```
 
 ## Usage
@@ -78,7 +80,7 @@ async function validatePayload(payload: Payload) {
 
 The `test` function takes variadic number of parameters where first parameter is the data to validate and rest of the parameters are either Validator classes or instance of validator classes. Use the instance of validator class if you have additional inputs that need to be made available when `test` calls the validator's `apply` method.
 
-If you need to run multiple validators and catch all the errors at once, you can ues `withCatch` function. The `check` function returned by `withCatch` simply adds the `catch` wrapper and collects all the errors into a single list.
+If you need to run multiple validators and catch all the errors at once, you can use `withCatch` function. The `check` function returned by `withCatch` simply adds the `catch` wrapper and collects all the errors into a single list.
 
 ```ts
 import { withCatch } from '@webf/rule';
@@ -98,6 +100,42 @@ async function validatePayload(payload: Payload) {
   // If previous invocation of `check` function created errors then, throw.
   rejectIfError();
 }
+```
+
+## Conditional validation
+
+Validators are often applied conditionally, for example, "validate age only if optional value birthdate is provided". Instead of wrapping `test` in an `if` block, use `testIf` — a conditional alternative to `test` that evaluates a condition first and runs the rules only when it holds. A skipped validation is a pass.
+
+```ts
+import { testIf } from '@webf/rule';
+
+// Precomputed boolean (or a Promise<boolean>)
+await testIf(!!input.birthdate, input, EnsureAgeAbove25);
+
+// Predicate over the value under test (sync or async)
+await testIf((input: User) => input.country === 'USA', input, EnsureAgeAbove25);
+```
+
+The condition can be any of:
+
+```ts
+type Condition<T> =
+  | boolean
+  | Promise<boolean>
+  | ((value: T) => boolean | Promise<boolean>);
+```
+
+When the condition holds, the rules run exactly as `test(value, ...rules)` would: failures throw the same `AggregateError` of `RuleError`s, so error handling does not change. An error thrown by the condition itself propagates unchanged — it is not collected as a rule failure.
+
+The collector returned by `withCatch` has the matching `checkIf` function:
+
+```ts
+const { check, checkIf, rejectIfError } = withCatch();
+
+await check(input.email, ValidEmail);
+await checkIf(!!input.birthdate, input, EnsureAgeAbove25);
+
+rejectIfError();
 ```
 
 ## Writing rules
